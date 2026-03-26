@@ -14,11 +14,15 @@ sms forwarding with Air700e/Air780E
 ## 编译
 
 需要CSDK
-https://gitee.com/openLuat/luatos-soc-2022
+https://github.com/shuanglengyunji/luatos-soc-2022
 
+`luatos-soc-2022> .\build.bat  sms_forward`
+
+## 烧写
 参考 [wiki](https://doc.openluat.com/wiki/37?wiki_page_id=4546)中的编译烧录流程。
+按住BOOT键，然后按复位键，松开BOOT键，即可进入刷机模式，若设备 没开始请先长按PWR键开机
 
-
+![board](image.png)
 ## 运行
 
 上电按Power 1s运行。

@@ -2,6 +2,7 @@ local TARGET_NAME = "sms_forward"
 local LIB_DIR = "$(buildir)/".. TARGET_NAME .. "/"
 local LIB_NAME = "lib" .. TARGET_NAME .. ".a "
 
+includes(SDK_TOP.."/luatos_lwip_socket")
 target(TARGET_NAME)
     set_kind("static")
     set_targetdir(LIB_DIR)
@@ -9,6 +10,7 @@ target(TARGET_NAME)
     --加入代码和头文件
     add_includedirs( SDK_TOP .. "/project/sms_forward/inc",{public = true})
     add_files("./src/*.c",{public = true})
+    add_deps("luatos_lwip_socket")
 
     --路径可以随便写,可以加任意路径的代码,下面代码等效上方代码
     -- add_includedirs(SDK_TOP .. "project/" .. TARGET_NAME .. "/inc",{public = true})
