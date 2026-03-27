@@ -81,7 +81,7 @@ static int do_handshake(mbedtls_ssl_context *ssl)
     memset(buf, 0, 1024);
 
     /*
-     * 4. Handshake
+        Handshake
      */
     LUAT_DEBUG_PRINT("  . Performing the SSL/TLS handshake...");
 
@@ -91,38 +91,6 @@ static int do_handshake(mbedtls_ssl_context *ssl)
             return -1;
         }
     }
-
-    LUAT_DEBUG_PRINT(" ok\n    [ Ciphersuite is %s ]\n",
-                   mbedtls_ssl_get_ciphersuite(ssl));
-
-//     /*
-//      * 5. Verify the server certificate
-//      */
-//     LUAT_DEBUG_PRINT("  . Verifying peer X.509 certificate...");
-
-//     /* In real life, we probably want to bail out when ret != 0 */
-//     if ((flags = mbedtls_ssl_get_verify_result(ssl)) != 0) {
-// #if !defined(MBEDTLS_X509_REMOVE_INFO)
-//         char vrfy_buf[512];
-// #endif
-
-//         LUAT_DEBUG_PRINT(" failed\n");
-
-// #if !defined(MBEDTLS_X509_REMOVE_INFO)
-//         mbedtls_x509_crt_verify_info(vrfy_buf, sizeof(vrfy_buf), "  ! ", flags);
-
-//         LUAT_DEBUG_PRINT("%s\n", vrfy_buf);
-// #endif
-//     } else {
-//         LUAT_DEBUG_PRINT(" ok\n");
-//     }
-
-// #if !defined(MBEDTLS_X509_REMOVE_INFO)
-//     LUAT_DEBUG_PRINT("  . Peer certificate information    ...\n");
-//     mbedtls_x509_crt_info((char *) buf, sizeof(buf) - 1, "      ",
-//                           mbedtls_ssl_get_peer_cert(ssl));
-//     LUAT_DEBUG_PRINT("%s\n", buf);
-// #endif
 
     return 0;
 }

@@ -13,4 +13,7 @@
 #define MAIL_PASS  "xxxxxx"   // password
 #define MAIL_TO    "xxxx@qq.com"    // mail receiver
 
+// 本机号码 
+#define MY_PHONE_NUMBER "1234567890"
+
 #endif // SMS_FORWARD_CONFIG_H

@@ -117,12 +117,11 @@ static void forward_sms_task(void *param)
 				}
 				LUAT_DEBUG_PRINT("msg utf8 : %s", msg);
 
-				snprintf(timestamp, 32, "[%02d年%02d月%02d日,%02d:%02d:%02d %c%02d]", data->time.year, data->time.month, data->time.day, data->time.hour, data->time.minute, data->time.second,data->time.tz_sign, data->time.tz);
+				snprintf(timestamp, 32, "%02d年%02d月%02d日,%02d:%02d:%02d %c%02d", data->time.year, data->time.month, data->time.day, data->time.hour, data->time.minute, data->time.second,data->time.tz_sign, data->time.tz);
 				LUAT_DEBUG_PRINT("timestamp %s", timestamp);
 
-				snprintf(mail_body, SMTP_BUF_SIZE, "From:\"SMS\"<%s>\r\nTo:%s\r\nsubject: New SMS!\r\n\r\n %s 收到来自%s的新消息:\n %s", 
-						MAIL_USER, MAIL_TO, timestamp,
-						data->phone_address, msg);
+				snprintf(mail_body, SMTP_BUF_SIZE, "From:\"SMS Forwarder\"<%s>\r\nTo:%s\r\nsubject:收到来自%s的新消息!\r\n\r\n [%s , To:%s]: \n%s", 
+						MAIL_USER, MAIL_TO, data->phone_address, timestamp, MY_PHONE_NUMBER, msg);
 				LUAT_DEBUG_PRINT(" send_email %s", mail_body);
 				send_email(MAIL_USER, MAIL_PASS, MAIL_TO, mail_body);
 				rcv_seg = 0;
