@@ -31,7 +31,7 @@ static int write_ssl_and_get_response(mbedtls_ssl_context *ssl, unsigned char *b
             return -1;
         }
 
-        luat_rtos_task_sleep(100);
+        luat_rtos_task_sleep(10);
     }
 
     do {
@@ -40,7 +40,7 @@ static int write_ssl_and_get_response(mbedtls_ssl_context *ssl, unsigned char *b
         ret = mbedtls_ssl_read(ssl, data, len);
 
         if (ret == MBEDTLS_ERR_SSL_WANT_READ || ret == MBEDTLS_ERR_SSL_WANT_WRITE) {
-            luat_rtos_task_sleep(100);
+            luat_rtos_task_sleep(10);
             continue;
         }
 
@@ -84,7 +84,6 @@ static int do_handshake(mbedtls_ssl_context *ssl)
      * 4. Handshake
      */
     LUAT_DEBUG_PRINT("  . Performing the SSL/TLS handshake...");
-    fflush(stdout);
 
     while ((ret = mbedtls_ssl_handshake(ssl)) != 0) {
         if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE) {
@@ -96,34 +95,34 @@ static int do_handshake(mbedtls_ssl_context *ssl)
     LUAT_DEBUG_PRINT(" ok\n    [ Ciphersuite is %s ]\n",
                    mbedtls_ssl_get_ciphersuite(ssl));
 
-    /*
-     * 5. Verify the server certificate
-     */
-    LUAT_DEBUG_PRINT("  . Verifying peer X.509 certificate...");
+//     /*
+//      * 5. Verify the server certificate
+//      */
+//     LUAT_DEBUG_PRINT("  . Verifying peer X.509 certificate...");
 
-    /* In real life, we probably want to bail out when ret != 0 */
-    if ((flags = mbedtls_ssl_get_verify_result(ssl)) != 0) {
-#if !defined(MBEDTLS_X509_REMOVE_INFO)
-        char vrfy_buf[512];
-#endif
+//     /* In real life, we probably want to bail out when ret != 0 */
+//     if ((flags = mbedtls_ssl_get_verify_result(ssl)) != 0) {
+// #if !defined(MBEDTLS_X509_REMOVE_INFO)
+//         char vrfy_buf[512];
+// #endif
 
-        LUAT_DEBUG_PRINT(" failed\n");
+//         LUAT_DEBUG_PRINT(" failed\n");
 
-#if !defined(MBEDTLS_X509_REMOVE_INFO)
-        mbedtls_x509_crt_verify_info(vrfy_buf, sizeof(vrfy_buf), "  ! ", flags);
+// #if !defined(MBEDTLS_X509_REMOVE_INFO)
+//         mbedtls_x509_crt_verify_info(vrfy_buf, sizeof(vrfy_buf), "  ! ", flags);
 
-        LUAT_DEBUG_PRINT("%s\n", vrfy_buf);
-#endif
-    } else {
-        LUAT_DEBUG_PRINT(" ok\n");
-    }
+//         LUAT_DEBUG_PRINT("%s\n", vrfy_buf);
+// #endif
+//     } else {
+//         LUAT_DEBUG_PRINT(" ok\n");
+//     }
 
-#if !defined(MBEDTLS_X509_REMOVE_INFO)
-    LUAT_DEBUG_PRINT("  . Peer certificate information    ...\n");
-    mbedtls_x509_crt_info((char *) buf, sizeof(buf) - 1, "      ",
-                          mbedtls_ssl_get_peer_cert(ssl));
-    LUAT_DEBUG_PRINT("%s\n", buf);
-#endif
+// #if !defined(MBEDTLS_X509_REMOVE_INFO)
+//     LUAT_DEBUG_PRINT("  . Peer certificate information    ...\n");
+//     mbedtls_x509_crt_info((char *) buf, sizeof(buf) - 1, "      ",
+//                           mbedtls_ssl_get_peer_cert(ssl));
+//     LUAT_DEBUG_PRINT("%s\n", buf);
+// #endif
 
     return 0;
 }
@@ -214,10 +213,9 @@ void send_email(char *user, char *pass, char *addr, char *body) {
     do_handshake(&ssl_cxt);
     if(ret != 0){
         LUAT_DEBUG_PRINT("ssl_mail_client fail\n");
-        return;
+        goto exit;
     }
 
-    luat_rtos_task_sleep(1000);
     ret = write_ssl_and_get_response(&ssl_cxt, buf, 0);
     LUAT_DEBUG_PRINT("rcv ret %d :%s\n", ret, buf);
 
@@ -254,7 +252,6 @@ void send_email(char *user, char *pass, char *addr, char *body) {
     }
 
     LUAT_DEBUG_PRINT("  > Write password to server: %s", pass);
-    fflush(stdout);
 
     ret = mbedtls_base64_encode(base, sizeof(base), &n, (const unsigned char *) pass,
                                 strlen(pass));
@@ -272,7 +269,6 @@ void send_email(char *user, char *pass, char *addr, char *body) {
 
     // MAIL FROM & RCPT TO
     LUAT_DEBUG_PRINT("  > Write MAIL FROM to server:");
-    fflush(stdout);
 
     len = mbedtls_snprintf((char *) buf, sizeof(buf), "MAIL FROM:<%s>\r\n", user);
     if (len < 0 || (size_t) len >= sizeof(buf)) {
@@ -288,7 +284,6 @@ void send_email(char *user, char *pass, char *addr, char *body) {
     LUAT_DEBUG_PRINT(" ok\n");
 
     LUAT_DEBUG_PRINT("  > Write RCPT TO to server:");
-    fflush(stdout);
 
     len = mbedtls_snprintf((char *) buf, sizeof(buf), "RCPT TO:<%s>\r\n", addr);
     if (len < 0 || (size_t) len >= sizeof(buf)) {
@@ -305,7 +300,6 @@ void send_email(char *user, char *pass, char *addr, char *body) {
 
     // DATA & 邮件正文
     LUAT_DEBUG_PRINT("  > Write DATA to server:");
-    fflush(stdout);
 
     len = sprintf((char *) buf, "DATA\r\n");
     ret = write_ssl_and_get_response(&ssl_cxt, buf, len);
@@ -317,7 +311,6 @@ void send_email(char *user, char *pass, char *addr, char *body) {
     LUAT_DEBUG_PRINT(" ok\n");
 
     LUAT_DEBUG_PRINT("  > Write content to server:");
-    fflush(stdout);
 
     len = mbedtls_snprintf((char *) buf, sizeof(buf),  "%s\r\n.\r\n", body);
     if (len < 0 || (size_t) len >= sizeof(buf)) {
@@ -335,15 +328,16 @@ void send_email(char *user, char *pass, char *addr, char *body) {
 
     LUAT_DEBUG_PRINT(" ok\n");
 
-    mbedtls_ssl_close_notify(&ssl_cxt);
 
     exit_code = MBEDTLS_EXIT_SUCCESS;
 
 exit:
-
+    mbedtls_ssl_close_notify(&ssl_cxt);
     mbedtls_net_free(&server_fd);
     mbedtls_ssl_free(&ssl_cxt);
     mbedtls_ssl_config_free(&conf);
+    mbedtls_entropy_free(&entropy);
+    mbedtls_ctr_drbg_free(&ctr_drbg);
 
-    mbedtls_exit(exit_code);
+    LUAT_DEBUG_PRINT(" send email end\n");
 }

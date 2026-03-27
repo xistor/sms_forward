@@ -70,19 +70,6 @@ static void demo_init_sms()
 
 }
 
-void get_my_number(void) {
-    char msisdn[32] = {0};
-    // 0 代表第一个 SIM 卡槽
-    int ret = luat_mobile_get_msisdn(0, msisdn, sizeof(msisdn));
-    
-    if (ret > 0) {
-        LUAT_DEBUG_PRINT("本机号码: %s", msisdn);
-    } else {
-        // 如果返回 0 或负数，说明 SIM 卡内没有记录号码
-        LUAT_DEBUG_PRINT("无法从 SIM 卡读取号码 (ErrorCode: %d)", ret);
-    }
-}
-
 static void forward_sms_task(void *param)
 {
 	uint32_t message_id = 0;
@@ -96,8 +83,6 @@ static void forward_sms_task(void *param)
 	uint32_t uni_hex[256] = {0};
 	uint8_t rcv_seg = 0;
 	char *mail_body = &msg_seg;
-	
-	get_my_number();
 
 	while(1)
 	{
